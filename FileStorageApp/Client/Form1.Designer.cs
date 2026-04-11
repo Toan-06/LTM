@@ -1,18 +1,19 @@
-﻿namespace Client;
+namespace Client;
 
 partial class Form1
 {
     /// <summary>
-    ///  Required designer variable.
+    ///  Biến bắt buộc dành cho giao diện Designer.
     /// </summary>
     private System.ComponentModel.IContainer components = null;
 
     /// <summary>
-    ///  Clean up any resources being used.
+    ///  Dọn dẹp các tài nguyên tĩnh đang sử dụng trong máy để giải phóng Ram.
     /// </summary>
-    /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+    /// <param name="disposing">true nếu cần kích hoạt tiến trình giải phóng dọn rác; ngược lại thì false.</param>
     protected override void Dispose(bool disposing)
     {
+        // Liên kết nội bộ rác bộ nhớ - GIỮ NGUYÊN
         if (disposing && (components != null))
         {
             components.Dispose();
@@ -20,14 +21,14 @@ partial class Form1
         base.Dispose(disposing);
     }
 
-    #region Windows Form Designer generated code
+    #region Mã nguồn do Windows Form Designer tự chèn tự động
 
     /// <summary>
-    ///  Required method for Designer support - do not modify
-    ///  the contents of this method with the code editor.
+    ///  Phương thức bắt buộc để hỗ trợ giao diện Designer - Đừng tự tay chỉnh sửa nội dung bên trong bằng code gõ, hãy qua màn Hình kéo thả.
     /// </summary>
     private void InitializeComponent()
     {
+        // Liên kết hệ thống tỷ lệ kích thước - Tự thiết kế ở Giao Diện
         components = new System.ComponentModel.Container();
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(800, 450);

@@ -23,20 +23,11 @@ namespace Server.Data
             // Vẫn giữ lại gọi hàm lõi gốc của lớp cha DbContext để không bị mất chức năng mặc định
             base.OnModelCreating(modelBuilder);
             
-            // ===== TODO (Toàn - Người 1): CONFIG DATABASE =====
-            /*
-             * Mục tiêu:
-             * - Cột Username trong Table Users phải là duy nhất (UNIQUE)
-             * - Không cho phép tạo 2 tài khoản trùng tên.
-             * 
-             * Hướng làm:
-             * - Sử dụng sức mạnh của Fluent API trong EF Core.
-             * - Gọi modelBuilder.Entity<User>()
-             * - Gắn thêm .HasIndex(u => u.Username).IsUnique(); 
-             * 
-             * Gợi ý thêm:
-             * - Để tránh Warning sinh lỗi, hãy chắc chắn thư viện Microsoft.EntityFrameworkCore.Sqlite đã được tải bằng NuGet.
-             */
+            // ===== ĐÃ XONG: CONFIG DATABASE =====
+            // Mục tiêu: Cột Username trong Table Users phải là duy nhất (UNIQUE)
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
         }
     }
 }

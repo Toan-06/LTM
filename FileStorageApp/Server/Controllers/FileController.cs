@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Server.Services;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Server.Controllers
 {
@@ -25,49 +26,87 @@ namespace Server.Controllers
             _fileService = fileService;
         }
 
-        // ===== TODO (Toàn - Người 1): HÀM HELPER HỖ TRỢ BÓC TOKEN =====
-        /*
-         * Mục đích: Lấy được Thư Mục bí mật từ Claims truyền từ Token sang. 
-         * Cần tạo viết hàm bảo mật rỗng: Private string GetUserFolder() -> Trả về Dãy Chuỗi Ẩn (Folder).
-         * Code gợi ý: return User.Claims.First(c => c.Type == "Folder").Value;
-         */
+        // ===== ĐÃ XONG: HÀM HELPER HỖ TRỢ BÓC TOKEN =====
+        private string GetUserFolder()
+        {
+            // Trích xuất claim "Folder" mà lúc nãy AuthController nhét vào Token
+            return User.Claims.FirstOrDefault(c => c.Type == "Folder")?.Value;
+        }
         
         // Nhận phương thức cấu trúc cổng mạng GET, URL con sẽ trở thành: /api/file/list?path=..... Nạp biến Query Parameter.
         [HttpGet("list")]
         public IActionResult GetItems([FromQuery] string path = "")
         {
-            // ===== TODO (Toàn - Người 1): CẤU TRÚC TRẢ DANH SÁCH =====
-            /* 
-             * Dùng Thùng Try-Catch bắt lỗi. Bên trong Try đọc biến ẩn Folder qua hàm Helper GetUserFolder. Ném nó và path qua hàm _fileService.GetItems(...) để lấy mảng file. Return trút mảng Json. Báo Catch về BadRequest (Lỗi hệ thống trả gởi cho Client).
-             */
-            return Ok();
+            try
+            {
+                string folder = GetUserFolder();
+                if (string.IsNullOrEmpty(folder)) return Unauthorized("Lỗi xác thực Token");
+
+                var items = _fileService.GetItems(folder, path);
+                return Ok(items);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = "Lỗi truy xuất hệ thống: " + ex.Message });
+            }
         }
 
         // Phương thức gánh file IFormFile cực nặng. Task bọc khối luồng chờ tải để gồng hệ thống không nghẹt thở mạng. URL là post tới /api/file/upload
         [HttpPost("upload")]
         public async Task<IActionResult> UploadFile([FromQuery] string path, IFormFile file)
         {
-            // TODO (Toàn - Người 1): Gợi gọi hàm _fileService.SaveFileAsync có dùng "await" chạy đệm.
-            return Ok();
+            try
+            {
+                string folder = GetUserFolder();
+                if (string.IsNullOrEmpty(folder)) return Unauthorized("Token sai lạc");
+
+                await _fileService.SaveFileAsync(folder, path, file);
+                return Ok(new { message = "Tải file lên ổ cứng Server thành công!" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = "Xảy ra lỗi trong luồng RAM: " + ex.Message });
+            }
         }
 
         // Kêu gọi kết nối download lấy nhả Stream ra ngoài rò trên dòng tải HTTP.
         [HttpGet("download")]
         public IActionResult DownloadFile([FromQuery] string filePath)
         {
-            // ===== TODO (Toàn - Người 1): CẤU TRÚC LƯU CHUYỂN FILE QUA GIAO THỨC OCTET =====
-            /*
-             * Trả về luồng Tải (File) với File MIME Type "application/octet-stream". Chứ ko return kiểu mã chèn OK() của JSON được ở đây.
-             */
-            return Ok();
+            try
+            {
+                string folder = GetUserFolder();
+                if (string.IsNullOrEmpty(folder)) return Unauthorized();
+
+                var stream = _fileService.GetFileStream(folder, filePath);
+                if (stream == null) return NotFound(new { message = "Không tìm kiếm thấy file trên ổ đĩa Server!" });
+
+                var fileName = System.IO.Path.GetFileName(filePath);
+                // Báo cho giao thức HTTP Browser của Client đây là File nhị phân dạng Octet. Bơm cả mảng stream này thẳng xuống đường truyền.
+                return File(stream, "application/octet-stream", fileName);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = "Xảy ra lỗi chập luồng ống: " + ex.Message });
+            }
         }
 
         // Cấu trúc cổng HttpDelete là quy chuẩn mạng chuyên cho các yêu cầu Hủy hoại dữ liệu.
         [HttpDelete("delete")]
         public IActionResult Delete([FromQuery] string itemPath)
         {
-            // TODO (Toàn - Người 1): Hủy diệt File/Folder vật lý và trả về cấu trúc chữ OK JSON.
-            return Ok();
+            try
+            {
+                string folder = GetUserFolder();
+                if (string.IsNullOrEmpty(folder)) return Unauthorized();
+
+                _fileService.DeleteItem(folder, itemPath);
+                return Ok(new { message = "Lệnh Hủy Diệt Vật Lý Thành Công!" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = "Lỗi Hủy Diệt File: " + ex.Message });
+            }
         }
     }
 }

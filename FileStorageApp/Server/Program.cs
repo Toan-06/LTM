@@ -1,49 +1,83 @@
-// Nạp thư viện khởi tạo ứng dụng Web/API
 using Microsoft.AspNetCore.Builder;
-// Nạp thư viện rổ tiêm phụ thuộc (Dependency Injection)
 using Microsoft.Extensions.DependencyInjection;
-// Nạp thư viện môi trường máy chủ
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models; // Namespace này bây giờ đã ổn định
+using Server.Data;
+using Server.Services;
 
-// Khởi chạy nền móng Builder để cất cấu trúc ứng dụng C# Server
 var builder = WebApplication.CreateBuilder(args);
 
-// ===== TODO (Toàn - Người 1): ĐĂNG KÝ DEPENDENCY INJECTION =====
-/*
- * Mục tiêu:
- * - Dưới không gian dòng chữ này, mọi Dịch vụ (DB, File, Security) phải được đăng ký vào rổ hệ thống (builder.Services).
- * - Nếu Toàn quên đăng ký ở đây, qua bên Controller gọi ra xài máy sẽ lập tức ném lỗi ngoại lệ Trắng Màn Hình.
- * 
- * Hướng làm:
- * - Bật các Controller: builder.Services.AddControllers();
- * - Khởi tạo Database: builder.Services.AddDbContext<AppDbContext>(...dùng Sqlite...);
- * - Đăng ký Service File vật lý: builder.Services.AddScoped<IFileStorageService, FileStorageService>();
- * - (Nâng cao) Cấu hình JWT: builder.Services.AddAuthentication() và AddJwtBearer().
- */
+// 1. Đăng ký Dịch vụ
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
-// Đóng máy ép, trộn toàn bộ biến Services phía trên thành một Máy chủ app có thể chạy được
+// 2. Cấu hình Swagger CHUẨN (Có ổ khóa)
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "File Storage API", Version = "v1" });
+
+    // Định nghĩa loại bảo mật JWT
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Dán Token vào đây (Ví dụ: abc123xyz)",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// 3. Cấu hình Database SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=rDB.sqlite"));
+
+// 4. Đăng ký FileStorageService
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+
+// 5. Cấu hình JWT Authentication
+var secretKey = System.Text.Encoding.ASCII.GetBytes("ChuoiBiMatSieuDaiCuaToan_PhaiDaiHon32KyTuDoBanNhe_FileStorageApp");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
 var app = builder.Build();
 
-// Nếu máy đang ở chế độ Code gỡ lỗi của Dev thì kích hoạt tính năng hỗ trợ nội bộ.
+// 6. Cấu hình Pipeline (Thứ tự quan trọng)
 if (app.Environment.IsDevelopment())
 {
-    // Bật Swagger nếu có cài
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-// Bắt buộc đường truyền bảo mật HTTPS để chống bị nghe trộm gói tin mạng
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
-// ===== TODO (Toàn - Người 1): ĐĂNG KÝ MIDDLEWARE BẢO MẬT =====
-/*
- * Mục tiêu:
- * - Mọi lệnh API có thẻ [Authorize] sẽ quét thẻ từ dòng này, nếu thiếu dòng này App sẽ ném lỗi 500 hoặc bỏ qua bảo mật.
- * 
- * Hướng làm:
- * - Chèn 2 dòng này ĐÚNG THỨ TỰ (Authentication đứng trước):
- *   + app.UseAuthentication();
- *   + app.UseAuthorization();
- * - Kích hoạt định tuyến tới thư mục Controller: app.MapControllers();
- */
+// Tự động chuyển trang chủ sang Swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
-// Nhấn nút RUN khởi chạy nổ máy chủ tại Localhost. Server chính thức nghe tín hiệu và hoạt động không ngủ.
 app.Run();
+

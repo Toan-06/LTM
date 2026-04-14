@@ -36,43 +36,78 @@ namespace Server.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] LoginRequest req)
         {
-            // ===== TODO (Toàn - Người 1): LUỒNG ĐĂNG KÝ (REGISTER) =====
-            /*
-             * Mục tiêu:
-             * - Kiểm tra trùng lặp UserName. Ném trả BadRequest.
-             * - Không được lưu mật khẩu gốc. Phải băm (Hash).
-             * - Tạo cơ sở thư mục vật lý đầu tiên cho người dùng lưu dữ liệu sau này.
-             * 
-             * Hướng làm (Chỉ còn mình Toàn - code logic bên trong lõi này):
-             * - Lệnh kiểm tra tồn tại: _context.Users.Any(u => u.Username == req.Username)
-             * - Cài NuGet "BCrypt.Net-Next" -> Dùng BCrypt.Net.BCrypt.HashPassword(req.Password).
-             * - Dùng kỹ thuật sinh tự động ID rác (Guid.NewGuid().ToString()) làm tên StorageFolderName để tránh Hacker đoán.
-             * - Gắn tất cả vào Object User -> .Add(user) -> .SaveChanges().
-             * - Đừng quên gọi _fileService.CreateUserDirectory(cái tên Guid đó);
-             */
-            return Ok(); // Lệnh trả trạng thái mạng 200 Bình Thường tới Client (Không cần trả JSON text)
+            // Bước 1: Kiểm tra username đã tồn tại chưa
+            if (_context.Users.Any(u => u.Username == req.Username))
+            {
+                return BadRequest(new { message = "Tài khoản đã tồn tại!" });
+            }
+
+            // Bước 2: Băm mật khẩu
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(req.Password);
+
+            // Bước 3: Sinh mã bí mật đại diện cho thư mục vật lý lưu trữ file của User này
+            string folderName = System.Guid.NewGuid().ToString();
+
+            // Bước 4: Lưu vào cơ sở dữ liệu
+            var user = new User
+            {
+                Username = req.Username,
+                PasswordHash = hashedPassword,
+                StorageFolderName = folderName
+            };
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            // Bước 5: Tạo thư mục trống trên ổ cứng (FileStorageService)
+            _fileService.CreateUserDirectory(folderName);
+
+            return Ok(new { message = "Đăng ký thành công!" });
         }
 
         // Quy định cổng phụ: /api/auth/login nhận phương thức POST xác thực.
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest req)
         {
-            // ===== TODO (Toàn - Người 1): LUỒNG ĐĂNG NHẬP & SINH THẺ BÀI (JWT) =====
-            /*
-             * Mục tiêu:
-             * - Khớp Username và Giải mã PasswordHash.
-             * - Trả về token mạng có giấu mã Folder của User đó (để FileController lấy ra móc dữ liệu chuẩn xác).
-             * 
-             * Hướng làm:
-             * - Kéo data User ra: _context.Users.FirstOrDefault(...). Nếu null = Unauthorized.
-             * - Khớp Pass: BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash). Nếu check == false = Unauthorized.
-             * - Lên mạng gõ "Generate C# JWT Object". Dùng JwtSecurityTokenHandler.
-             * - !! BẮT BUỘC nhét 2 cục này vào mảng Claim của JWT Token:
-             *   + Tham số Name: user.Username
-             *   + Tham số "Folder": user.StorageFolderName
-             * - Trả về Token kèm mã báo Ok.
-             */
-            return Ok(); // Cấu trúc khi trả JSON ra ngòai Client: return Ok(new { ThuocTinh = ket_qua });
+            // Bước 1: Tìm User trong DB
+            var user = _context.Users.FirstOrDefault(u => u.Username == req.Username);
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Tài khoản không tồn tại!" });
+            }
+
+            // Bước 2: Đối chiếu mật khẩu băm
+            bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);
+            if (!isPasswordCorrect)
+            {
+                return Unauthorized(new { message = "Sai mật khẩu!" });
+            }
+
+            // Bước 3: Sinh JWT Token chứa kẹp FolderName (Thẻ bài)
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            // Khóa bí mật ký Token (thường phải giấu trong appsettings.json, ở đây mình viết thẳng tạm để chạy được ngay)
+            var secretKey = System.Text.Encoding.ASCII.GetBytes("ChuoiBiMatSieuDaiCuaToan_PhaiDaiHon32KyTuDoBanNhe_FileStorageApp");
+            
+            var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+            {
+                Subject = new System.Security.Claims.ClaimsIdentity(new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
+                    new System.Security.Claims.Claim("Folder", user.StorageFolderName)
+                }),
+                Expires = System.DateTime.UtcNow.AddDays(1), // Token sống được 1 ngày
+                SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(secretKey), 
+                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+            };
+            
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            string jwtString = tokenHandler.WriteToken(token);
+
+            // Bước 4: Trả Token về cho Client
+            return Ok(new { 
+                message = "Đăng nhập thành công!",
+                token = jwtString
+            });
         }
     }
 }

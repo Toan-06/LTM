@@ -37,50 +37,80 @@ namespace Server.Services
         // Hàm helper sinh ra đường dẫn gốc cho thư mục con bí mật của riêng cá nhân User. (Biến folderName là mã Guid)
         public string GetUserRootPath(string folderName) => Path.Combine(_baseStoragePath, folderName);
 
-        // BÓC TÁCH MẢNG NHIỆM VỤ NGƯỜI 1: TẤT CẢ TODO VẪN GIỮ TRANG THÁI NHƯ CŨ BÊN TRONG!
+        // BÓC TÁCH MẢNG NHIỆM VỤ NGƯỜI 1: ĐÃ HOÀN THIỆN
         public bool IsSafePath(string rootPath, string targetPath)
         {
-            // ===== TODO (Toàn - Người 1): THUẬT TOÁN BẮT HACKER =====
-            /*
-             * Mục tiêu:
-             * - Phải rào được lỗ hổng chết người của Lập trình mạng: Path Traversal (Client cố tình truy cập "D:/Hack/../../Máy chủ").
-             * - Hàm này sẽ được các hàm bên dưới gọi để rào chốt An ninh.
-             * 
-             * Hướng làm:
-             * - Sử dụng hàm lõi: Path.GetFullPath(chuỗi) trên biến rootPath và biến targetPath để Hệ điều hành bung tên thật của chuỗi độc hại ra.
-             * - So sánh: Dùng hàm TargetFull.StartsWith(RootFull, StringComparison.OrdinalIgnoreCase).
-             * - Trả True (An toàn) nếu Target nằm trọn vúi trong Root. False (Hack) nếu Target lòi ra ổ C, ổ D...
-             */
-            return false;
+            var fullRootPath = Path.GetFullPath(rootPath);
+            var fullTargetPath = Path.GetFullPath(targetPath);
+            // Hacker truyền targetPath kiểu "../../../Windows", sau khi GetFullPath nó không thể nào có phần đầu giống fullRootPath được.
+            return fullTargetPath.StartsWith(fullRootPath, System.StringComparison.OrdinalIgnoreCase);
         }
 
         public void CreateUserDirectory(string folderName)
         {
-            // TODO (Toàn - Người 1): Viết lệnh gọi Directory.CreateDirectory, nhớ Check Directory.Exists trước.
+            var path = GetUserRootPath(folderName);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
         }
 
         public string[] GetItems(string userFolder, string subPath)
         {
-            // ===== TODO (Toàn - Người 1): THUẬT TOÁN LẤY & GỘP DANH SÁCH =====
-            /* Mọi thứ đã có hướng dẫn như cũ, bạn tự tin mở khóa chức năng ... */
-            return System.Array.Empty<string>();
+            string folderPath = Path.Combine(GetUserRootPath(userFolder), subPath ?? "");
+            if (!IsSafePath(GetUserRootPath(userFolder), folderPath)) return System.Array.Empty<string>();
+            if (!Directory.Exists(folderPath)) return System.Array.Empty<string>();
+
+            var folders = Directory.GetDirectories(folderPath);
+            var files = Directory.GetFiles(folderPath);
+            
+            var result = new System.Collections.Generic.List<string>();
+            foreach(var d in folders) result.Add("[Dir] " + Path.GetFileName(d));
+            foreach(var f in files) result.Add("[File] " + Path.GetFileName(f));
+            
+            return result.ToArray();
         }
 
         public async Task SaveFileAsync(string userFolder, string subPath, IFormFile file)
         {
-            // ===== TODO (Toàn - Người 1): THUẬT TOÁN TẢI FILE BẤT ĐỒNG BỘ =====
-            /* Mọi thứ đã có hướng dẫn như cũ, hãy sử dụng await và FileStream. */
+            if (file == null || file.Length == 0) return;
+            string folderPath = Path.Combine(GetUserRootPath(userFolder), subPath ?? "");
+            if (!IsSafePath(GetUserRootPath(userFolder), folderPath)) return;
+            
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            
+            string filePath = Path.Combine(folderPath, file.FileName);
+            if (!IsSafePath(GetUserRootPath(userFolder), filePath)) return;
+
+            // Ghi file từ RAM xuống ổ cứng vật lý
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
         }
 
         public FileStream GetFileStream(string userFolder, string filePath)
         {
-            // TODO (Toàn - Người 1): Trả về 1 FileStream (dạng FileMode.Open, FileAccess.Read) để Controller ném qua mạng về Client. Nhớ kiểm tra IsSafePath.
-            return null;
+            string fullPath = Path.Combine(GetUserRootPath(userFolder), filePath ?? "");
+            if (!IsSafePath(GetUserRootPath(userFolder), fullPath)) return null;
+            if (!File.Exists(fullPath)) return null;
+
+            return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
         }
 
         public void DeleteItem(string userFolder, string itemPath)
         {
-            // TODO (Toàn - Người 1): Dùng If kiểm tra (File.Exists thì xóa File, Directory.Exists thì xóa Folder - dùng cờ true để bắt buộc xóa dù bên trong có ruột hay không).
+            string fullPath = Path.Combine(GetUserRootPath(userFolder), itemPath ?? "");
+            if (!IsSafePath(GetUserRootPath(userFolder), fullPath)) return;
+
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+            else if (Directory.Exists(fullPath))
+            {
+                Directory.Delete(fullPath, true);
+            }
         }
     }
 }

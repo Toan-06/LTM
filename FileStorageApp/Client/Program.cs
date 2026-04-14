@@ -12,8 +12,8 @@ namespace Client
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             
-            // Khởi chạy hệ thống từ màn hình đăng nhập
-            Application.Run(new Form_Login());
+            // Khởi chạy hệ thống từ màn hình chính (Đã tích hợp đăng nhập)
+            Application.Run(new Form_Main());
         }
     }
 }

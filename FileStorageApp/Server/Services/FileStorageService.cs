@@ -1,116 +1,67 @@
-// Nạp thư viện lõi hệ thống thao tác Tệp của hệ điều hành
 using System.IO;
-// Nạp luồng vận hành mạng bất đồng bộ giúp app ko treo
+using System.Linq;
 using System.Threading.Tasks;
-// Khai báo form file tải lên từ giao thức Http
-using Microsoft.AspNetCore.Http;
 
 namespace Server.Services
 {
-    // Bản hợp đồng (Interface) định ra hàng loạt Khuôn mẫu Cấm sai sửa để các lớp phải tuân theo khi kết nối API
-    public interface IFileStorageService
+    // DỊCH VỤ FILE (Người 1 quản lý)
+    public class FileService
     {
-        string GetUserRootPath(string folderName);
-        bool IsSafePath(string rootPath, string targetPath);
-        void CreateUserDirectory(string folderName);
-        string[] GetItems(string userFolder, string subPath);
-        Task SaveFileAsync(string userFolder, string subPath, IFormFile file);
-        FileStream GetFileStream(string userFolder, string filePath);
-        void DeleteItem(string userFolder, string itemPath);
-    }
+        private readonly string _root = Path.Combine(Directory.GetCurrentDirectory(), "Storage");
 
-    // Lớp thực thi bản hợp đồng. Là trung tâm xử lý thao tác với SSD / HDD.
-    public class FileStorageService : IFileStorageService
-    {
-        // Biến lưu giữ cứng cái đường dẫn ngầm định trên máy chủ (C:\App\StorageTemp)
-        private readonly string _baseStoragePath;
-
-        // Constructor chạy đầu tiên lúc FileStorageService được đẻ ra 1 lần
-        public FileStorageService()
+        public FileService()
         {
-            // Thiết lập gắn mác đường dẫn mặc định bằng cách tính toán Vị trí file Executable hiện hành nối với chữ StorageTemp
-            _baseStoragePath = Path.Combine(Directory.GetCurrentDirectory(), "StorageTemp");
-            // Nếu cục thư mục gốc này chưa khởi tạo (mới chạy lần đầu) thì ra tay sinh mới nó
-            if (!Directory.Exists(_baseStoragePath)) Directory.CreateDirectory(_baseStoragePath);
+            if (!Directory.Exists(_root)) Directory.CreateDirectory(_root);
         }
 
-        // Hàm helper sinh ra đường dẫn gốc cho thư mục con bí mật của riêng cá nhân User. (Biến folderName là mã Guid)
-        public string GetUserRootPath(string folderName) => Path.Combine(_baseStoragePath, folderName);
-
-        // BÓC TÁCH MẢNG NHIỆM VỤ NGƯỜI 1: ĐÃ HOÀN THIỆN
-        public bool IsSafePath(string rootPath, string targetPath)
+        // Lấy đường dẫn: Luôn bắt đầu từ Storage/Username để đảm bảo PHÂN QUYỀN
+        public string GetPath(string user, string subPath = "") 
         {
-            var fullRootPath = Path.GetFullPath(rootPath);
-            var fullTargetPath = Path.GetFullPath(targetPath);
-            // Hacker truyền targetPath kiểu "../../../Windows", sau khi GetFullPath nó không thể nào có phần đầu giống fullRootPath được.
-            return fullTargetPath.StartsWith(fullRootPath, System.StringComparison.OrdinalIgnoreCase);
-        }
-
-        public void CreateUserDirectory(string folderName)
-        {
-            var path = GetUserRootPath(folderName);
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
-
-        public string[] GetItems(string userFolder, string subPath)
-        {
-            string folderPath = Path.Combine(GetUserRootPath(userFolder), subPath ?? "");
-            if (!IsSafePath(GetUserRootPath(userFolder), folderPath)) return System.Array.Empty<string>();
-            if (!Directory.Exists(folderPath)) return System.Array.Empty<string>();
-
-            var folders = Directory.GetDirectories(folderPath);
-            var files = Directory.GetFiles(folderPath);
+            string userRoot = Path.Combine(_root, user);
+            if (!Directory.Exists(userRoot)) Directory.CreateDirectory(userRoot);
             
-            var result = new System.Collections.Generic.List<string>();
-            foreach(var d in folders) result.Add("[Dir] " + Path.GetFileName(d));
-            foreach(var f in files) result.Add("[File] " + Path.GetFileName(f));
-            
-            return result.ToArray();
+            // Kết hợp với subPath (nếu có)
+            return Path.Combine(userRoot, subPath ?? "");
         }
 
-        public async Task SaveFileAsync(string userFolder, string subPath, IFormFile file)
+        // Tạo thư mục
+        public void CreateDir(string user, string subPath = "")
         {
-            if (file == null || file.Length == 0) return;
-            string folderPath = Path.Combine(GetUserRootPath(userFolder), subPath ?? "");
-            if (!IsSafePath(GetUserRootPath(userFolder), folderPath)) return;
-            
-            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-            
-            string filePath = Path.Combine(folderPath, file.FileName);
-            if (!IsSafePath(GetUserRootPath(userFolder), filePath)) return;
-
-            // Ghi file từ RAM xuống ổ cứng vật lý
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
+            Directory.CreateDirectory(GetPath(user, subPath));
         }
 
-        public FileStream GetFileStream(string userFolder, string filePath)
+        // Liệt kê file/thư mục
+        public string[] List(string user, string subPath = "")
         {
-            string fullPath = Path.Combine(GetUserRootPath(userFolder), filePath ?? "");
-            if (!IsSafePath(GetUserRootPath(userFolder), fullPath)) return null;
-            if (!File.Exists(fullPath)) return null;
-
-            return new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+            string p = GetPath(user, subPath);
+            if (!Directory.Exists(p)) return new string[] { "Thư mục không tồn tại" };
+            
+            return Directory.GetFileSystemEntries(p)
+                            .Select(x => (Directory.Exists(x) ? "[D] " : "[F] ") + Path.GetFileName(x))
+                            .ToArray();
         }
 
-        public void DeleteItem(string userFolder, string itemPath)
+        // Lưu file (Từ mảng byte)
+        public async Task SaveFile(string user, string subPath, string fileName, byte[] data)
         {
-            string fullPath = Path.Combine(GetUserRootPath(userFolder), itemPath ?? "");
-            if (!IsSafePath(GetUserRootPath(userFolder), fullPath)) return;
+            string p = Path.Combine(GetPath(user, subPath), fileName);
+            await File.WriteAllBytesAsync(p, data);
+        }
 
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
-            }
-            else if (Directory.Exists(fullPath))
-            {
-                Directory.Delete(fullPath, true);
-            }
+        // Đọc file (Trả về mảng byte)
+        public async Task<byte[]> ReadFile(string user, string filePath)
+        {
+            string p = GetPath(user, filePath);
+            if (!File.Exists(p)) return null;
+            return await File.ReadAllBytesAsync(p);
+        }
+
+        // Xóa
+        public void Delete(string user, string subPath)
+        {
+            string p = GetPath(user, subPath);
+            if (File.Exists(p)) File.Delete(p);
+            else if (Directory.Exists(p)) Directory.Delete(p, true);
         }
     }
 }

@@ -1,29 +1,17 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Server.Models
 {
+    // Model người dùng cực kỳ tối giản cho DB
     public class User
     {
-        [Key]
         public int Id { get; set; }
-
-        [Required]
-        [MaxLength(50)]
-        public string Username { get; set; }
-
-        [Required]
-        public string PasswordHash { get; set; }
-
-        [Required]
-        public string StorageFolderName { get; set; } 
+        public string Username { get; set; } = "";
+        public string PasswordHash { get; set; } = "";
     }
 
-    public class LoginRequest
+    // Class phụ để bóc tách dữ liệu từ Client gửi lên dạng chuỗi
+    public class AuthRequest
     {
-        [Required]
-        public string Username { get; set; }
-
-        [Required]
-        public string Password { get; set; }
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 }

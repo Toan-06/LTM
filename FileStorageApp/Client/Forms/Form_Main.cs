@@ -1,73 +1,96 @@
-// Chạm tương tác đồ hoạ Winforms
 using System;
 using System.Windows.Forms;
+using Client.Services;
 
 namespace Client.Forms
 {
-    // Bàn làm việc trung tâm
     public partial class Form_Main : Form
     {
-        // Khởi tạo link vào UI
+        // ==========================================
+        // KHU VỰC CỦA NGƯỜI 1 (BẠN): BỘ KHUNG & KẾT NỐI
+        // ==========================================
+        private string currentUser = ""; 
+        private string currentPath = ""; 
+
         public Form_Main()
         {
             InitializeComponent();
         }
 
-        // Móc hàm Lifecycle mồi (Ngay khi Form Cửa sổ vừa mở lên xong, Hàm này sẽ mồi gọi bảng List hiển thị để khỏi phải F5)
-        private void Form_Main_Load(object sender, EventArgs e)
+        // Bạn (Người 1) đã làm sẵn logic Đăng nhập/Đăng ký để nhóm có thể kết nối được Server
+        private async void BtnLogin_Socket_Click(object sender, EventArgs e)
         {
-            LoadFiles(txtAddressBar.Text);
+            // Truyền txtIP.Text vào hàm Send để kết nối động theo đúng yêu cầu
+            string res = await SocketService.Send(txtIP.Text, $"LOGIN|{txtUser.Text}|{txtPass.Text}");
+
+            if (res.StartsWith("LOGIN_OK"))
+            {
+                currentUser = res.Split('|')[1];
+                MessageBox.Show($"Đã kết nối! Chào mừng {currentUser}.");
+                LoadFiles(""); // Gọi hàm tải file
+            }
+            else MessageBox.Show("Lỗi: " + res);
         }
 
-        // Hàm helper dùng để vẽ lại cái Bảng Hiển Thị File
-        private void LoadFiles(string path)
+        private async void BtnRegister_Socket_Click(object sender, EventArgs e)
         {
-            // ===== TODO (Trang - Người 2): TRẢ LỚP LAYER HIỂN THỊ =====
-            /* Thêm chữ Async nhé Trang! Moi var mang_tra_ve = await ApiClient.GetFilesAsync của anh Giang làm. Chạy vòng lặp foreach ném từng cái vào ListViewItem. Đừng quên Cấm kị là phải Dọn sạch thẻ bằng listViewFiles.Items.Clear() trước khi ném data mới vào ko rác ngập ngụa cái bảng. */
+            // Truyền txtIP.Text vào hàm Send
+            string res = await SocketService.Send(txtIP.Text, $"REGISTER|{txtUser.Text}|{txtPass.Text}");
+            MessageBox.Show(res);
         }
 
-        // Móc Sự Kiện Back
-        private void BtnBack_Click(object sender, EventArgs e)
+        // ==========================================
+        // KHU VỰC CỦA TRANG (NGƯỜI 2): LOGIC XỬ LÝ DỮ LIỆU
+        // ==========================================
+        
+        private async void LoadFiles(string subPath)
         {
-            // ===== TODO (Trang - Người 2): LOGIC CẮT CHUỖI NHẢY BẬC =====
-            /* Dùng LastIndexOf('/') tóm cổ vị trí dấu xuyệt. Xài SubString lấy vạt chữ cái. Gán ngược vào thanh AddressBar và mồi lại tải data qua LoadFiles()*/
+            // TODO (Trang): 
+            // 1. Gọi lệnh LIST qua SocketService: SocketService.Send(txtIP.Text, $"LIST|{currentUser}|{subPath}")
+            // 2. Tách chuỗi kết quả (Split '|') để lấy danh sách file.
+            // 3. Xóa ListView cũ và dùng vòng lặp ném mảng file vào listViewFiles để hiển thị.
         }
 
-        // Móc Sự kiện Nút Refresh
-        private void BtnRefresh_Click(object sender, EventArgs e)
-        {
-            // Gọi tươi lại màn hình hiển thị theo giá trị ô text
-            LoadFiles(txtAddressBar.Text);
-        }
-
-        // Móc sự kiện Nút Upload Nhấn Vô Cửa Sổ Tìm File
         private void BtnUpload_Click(object sender, EventArgs e)
         {
-            // ===== TODO (Trang - Người 2): LOGIC HỘP THOẠI UPLOAD =====
-            /*
-             * Trang là UI, Trang phải mở Windows Popup: using var ofd = new OpenFileDialog();
-             * Kích lệnh chặn if (ofd.ShowDialog() == DialogResult.OK)
-             * Trích cái Tên File Vật lý nằm ở "ofd.FileName" để thảy sang Gọi hàm Upload (await) bên nhà Dịch Vụ Mạng (ApiClient). Thành công thì báo MessageBox thông báo tươi rồi mớm Refresh Loadfiles.
-             */
-        }
-
-        // Móc sự kiện Mouse Click Double vào 1 ô dữ liệu trong Bảng
-        private void ListViewFiles_DoubleClick(object sender, EventArgs e)
-        {
-            // ===== TODO (Trang - Người 2): LOGIC NHẤN KÉP FOLDER =====
-            /* Lấy tên ô chọn nằm tại mảng: listViewFiles.SelectedItems[0].Text . Nối vào đuôi của AddressBar. Xong gọi LoadFile. Mượt! */
-        }
-
-        // Các hàm xử lý chuột Trái/Phải của Mạng Download và Delete.
-        private void MenuDownload_Click(object sender, EventArgs e)
-        {
-            // ===== TODO (Trang - Người 2): HỘP THOẠI SAVE =====
-            /* Trang xử hộp SaveFileDialog tương tự ở trên. Mớm cái FileName chốt vô API Download File ổng Giang ổng mần xong. */
+            // TODO (Trang): 
+            // 1. Sau khi Giang (Người 3) mở được hộp thoại chọn file, hãy đọc file thành mảng Byte.
+            // 2. Chuyển mảng Byte thành chuỗi Base64: Convert.ToBase64String(bytes).
+            // 3. Gửi lệnh UPLOAD lên Server: await SocketService.Send(txtIP.Text, $"UPLOAD|{currentUser}|{currentPath}|{fileName}|{base64Data}")
         }
 
         private void MenuDelete_Click(object sender, EventArgs e)
         {
-            // TODO (Trang - Người 2): Bắt được Tên trên Table -> quăng File HTTP delete sang cho Giang ăn rác.
+            // TODO (Trang): 
+            // 1. Lấy tên file đang chọn trên ListView.
+            // 2. Gửi lệnh DELETE lên Server theo đúng định dạng qua SocketService.Send(txtIP.Text, ...)
         }
+
+        // ==========================================
+        // KHU VỰC CỦA GIANG (NGƯỜI 3): GIAO DIỆN & TƯƠNG TÁC
+        // ==========================================
+
+        private void BtnRefresh_Click(object sender, EventArgs e)
+        {
+            // TODO (Giang): Gọi lại hàm LoadFiles(currentPath) để làm mới màn hình.
+        }
+
+        private void BtnBack_Click(object sender, EventArgs e)
+        {
+            // TODO (Giang): Xử lý cắt chuỗi currentPath để quay lại thư mục cha (Dùng LastIndexOf).
+        }
+
+        private void ListViewFiles_DoubleClick(object sender, EventArgs e)
+        {
+            // TODO (Giang): Lấy tên Item đang được click đúp, nối vào currentPath và gọi LoadFiles.
+        }
+
+        private void MenuDownload_Click(object sender, EventArgs e)
+        {
+            // TODO (Giang): Mở SaveFileDialog để người dùng chọn chỗ lưu file trên máy mình.
+            // (Phần tải dữ liệu thật sẽ do Trang gọi API Download).
+        }
+
+        private void Form_Main_Load(object sender, EventArgs e) { }
     }
 }

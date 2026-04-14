@@ -1,83 +1,47 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models; // Namespace này bây giờ đã ổn định
-using Server.Data;
-using Server.Services;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// 1. Đăng ký Dịch vụ
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-
-// 2. Cấu hình Swagger CHUẨN (Có ổ khóa)
-builder.Services.AddSwaggerGen(c =>
+namespace Server
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "File Storage API", Version = "v1" });
-
-    // Định nghĩa loại bảo mật JWT
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    class Program
     {
-        Description = "Dán Token vào đây (Ví dụ: abc123xyz)",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+        static async Task Main()
         {
-            new OpenApiSecurityScheme
+            Console.OutputEncoding = Encoding.UTF8;
+            TcpListener server = new TcpListener(IPAddress.Any, 12345);
+            server.Start();
+
+            Console.WriteLine("=== SERVER FILE STORAGE (LTM) ===");
+            Console.WriteLine("Server đang chạy tại cổng 12345...");
+
+            while (true)
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            new string[] {}
+                var client = await server.AcceptTcpClientAsync();
+                _ = Task.Run(() => HandleClient(client));
+            }
         }
-    });
-});
 
-// 3. Cấu hình Database SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=rDB.sqlite"));
-
-// 4. Đăng ký FileStorageService
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
-
-// 5. Cấu hình JWT Authentication
-var secretKey = System.Text.Encoding.ASCII.GetBytes("ChuoiBiMatSieuDaiCuaToan_PhaiDaiHon32KyTuDoBanNhe_FileStorageApp");
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        static async Task HandleClient(TcpClient client)
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(secretKey),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
+            using var stream = client.GetStream();
+            var reader = new StreamReader(stream, Encoding.UTF8);
+            var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
-var app = builder.Build();
+            try
+            {
+                while (client.Connected)
+                {
+                    string? req = await reader.ReadLineAsync();
+                    if (req == null) break;
 
-// 6. Cấu hình Pipeline (Thứ tự quan trọng)
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+                    Console.WriteLine($"Nhận: {req}");
+                    string res = await CommandHandler.Handle(req);
+                    await writer.WriteLineAsync(res);
+                }
+            }
+            catch { }
+            finally { client.Close(); }
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-// Tự động chuyển trang chủ sang Swagger
-app.MapGet("/", () => Results.Redirect("/swagger"));
-
-app.Run();
-

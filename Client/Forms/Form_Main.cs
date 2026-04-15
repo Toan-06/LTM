@@ -34,6 +34,8 @@ namespace Client.Forms
                 {
                     currentUser = res.Split('|')[1];
                     panelLogin.Visible = false; // [HOÀN THIỆN] Ẩn bảng đăng nhập cho đẹp
+                    btnLogout.Visible = true;   // Hiện nút Đăng xuất
+                    btnLogout.BringToFront();   // Đảm bảo hiển thị trên cùng
                     MessageBox.Show($"Đã kết nối! Chào mừng {currentUser}.");
                     await LoadFiles(currentPath);
                 }
@@ -63,6 +65,7 @@ namespace Client.Forms
             currentPath = "/";
             listViewFiles.Items.Clear();
             txtAddressBar.Text = "/";
+            btnLogout.Visible = false; // Ẩn nút Đăng xuất
             panelLogin.Visible = true; // Hiện lại bảng đăng nhập
             MessageBox.Show("Đã đăng xuất thành công!");
         }

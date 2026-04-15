@@ -93,7 +93,7 @@ namespace Client.Forms
             // 
             // txtIP
             // 
-            txtIP.Location = new Point(80, 20);
+            txtIP.Location = new Point(26, 20);
             txtIP.Margin = new Padding(3, 4, 3, 4);
             txtIP.Name = "txtIP";
             txtIP.Size = new Size(114, 27);
@@ -102,7 +102,7 @@ namespace Client.Forms
             // 
             // txtUser
             // 
-            txtUser.Location = new Point(225, 21);
+            txtUser.Location = new Point(309, 19);
             txtUser.Margin = new Padding(3, 4, 3, 4);
             txtUser.Name = "txtUser";
             txtUser.PlaceholderText = "Username";
@@ -112,7 +112,7 @@ namespace Client.Forms
             // 
             // txtPass
             // 
-            txtPass.Location = new Point(393, 20);
+            txtPass.Location = new Point(460, 19);
             txtPass.Margin = new Padding(3, 4, 3, 4);
             txtPass.Name = "txtPass";
             txtPass.PasswordChar = '*';
@@ -125,7 +125,7 @@ namespace Client.Forms
             // 
             btnLogin.BackColor = Color.DarkCyan;
             btnLogin.ForeColor = Color.White;
-            btnLogin.Location = new Point(565, 15);
+            btnLogin.Location = new Point(612, 15);
             btnLogin.Margin = new Padding(3, 4, 3, 4);
             btnLogin.Name = "btnLogin";
             btnLogin.Size = new Size(114, 37);
@@ -138,7 +138,7 @@ namespace Client.Forms
             // 
             btnRegister.BackColor = Color.DarkCyan;
             btnRegister.ForeColor = SystemColors.ControlLightLight;
-            btnRegister.Location = new Point(709, 15);
+            btnRegister.Location = new Point(741, 15);
             btnRegister.Margin = new Padding(3, 4, 3, 4);
             btnRegister.Name = "btnRegister";
             btnRegister.Size = new Size(114, 37);
@@ -257,13 +257,14 @@ namespace Client.Forms
             // 
             btnLogout.BackColor = Color.Red;
             btnLogout.ForeColor = Color.White;
-            btnLogout.Location = new Point(790, 527);
+            btnLogout.Location = new Point(791, 527);
             btnLogout.Margin = new Padding(3, 4, 3, 4);
             btnLogout.Name = "btnLogout";
             btnLogout.Size = new Size(95, 33);
             btnLogout.TabIndex = 9;
             btnLogout.Text = "Đăng xuất";
             btnLogout.UseVisualStyleBackColor = false;
+            btnLogout.Visible = false;
             btnLogout.Click += BtnLogout_Click;
             // 
             // progressBar1

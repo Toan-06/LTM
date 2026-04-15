@@ -23,7 +23,10 @@ namespace Client.Services
         {
             string res = await SendAsync(ip, $"LIST|{username}|{path}");
             if (res.StartsWith("LIST_OK|"))
-                return res.Split('|')[1].Split(',');
+            {
+                string data = res.Split('|')[1];
+                return string.IsNullOrEmpty(data) ? Array.Empty<string>() : data.Split(',');
+            }
             return new[] { res };
         }
 
@@ -39,8 +42,16 @@ namespace Client.Services
         public static async Task<byte[]> DownloadAsync(string ip, string username, string path)
         {
             string res = await SendAsync(ip, $"DOWNLOAD|{username}|{path}");
-            return res.StartsWith("DOWNLOAD_OK|") ? Convert.FromBase64String(res.Split('|')[1]) : null;
+            if (res.StartsWith("DOWNLOAD_OK|"))
+            {
+                try { return Convert.FromBase64String(res.Split('|')[1]); }
+                catch { return null; }
+            }
+            return null;
         }
+
+        public static Task<string> RenameAsync(string ip, string username, string path, string newName) =>
+            SendAsync(ip, $"RENAME|{username}|{path}|{newName}");
 
         public static Task<string> DeleteAsync(string ip, string username, string path) =>
             SendAsync(ip, $"DELETE|{username}|{path}");

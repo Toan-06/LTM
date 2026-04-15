@@ -14,9 +14,12 @@ namespace Client.Services
         {
             try
             {
-                using var client = new TcpClient(ip, Port);
+                using var client = new TcpClient();
+                client.ReceiveTimeout = 5000;
+                client.SendTimeout = 5000;
+                await client.ConnectAsync(ip, Port);
+
                 using var stream = client.GetStream();
-                
                 var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
                 var reader = new StreamReader(stream, Encoding.UTF8);
 

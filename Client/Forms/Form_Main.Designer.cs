@@ -22,6 +22,7 @@ namespace Client.Forms
         private System.Windows.Forms.TextBox txtAddressBar;
         private System.Windows.Forms.Button btnBack;
         private System.Windows.Forms.Button btnUpload;
+        private System.Windows.Forms.Button btnNewFolder;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem menuDownload;
@@ -64,6 +65,7 @@ namespace Client.Forms
             this.txtAddressBar = new System.Windows.Forms.TextBox();
             this.btnBack = new System.Windows.Forms.Button();
             this.btnUpload = new System.Windows.Forms.Button();
+            this.btnNewFolder = new System.Windows.Forms.Button();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuDownload = new System.Windows.Forms.ToolStripMenuItem();
@@ -142,13 +144,17 @@ namespace Client.Forms
             this.btnRefresh.Text = "Làm mới";
             this.btnRefresh.Click += new System.EventHandler(this.BtnRefresh_Click);
 
-            this.btnUpload.Location = new System.Drawing.Point(545, 58);
-            this.btnUpload.Size = new System.Drawing.Size(75, 25);
             this.btnUpload.Text = "Tải lên";
             this.btnUpload.Click += new System.EventHandler(this.BtnUpload_Click);
 
+            this.btnNewFolder.Location = new System.Drawing.Point(630, 58);
+            this.btnNewFolder.Size = new System.Drawing.Size(95, 25);
+            this.btnNewFolder.Text = "Thư mục mới";
+            this.btnNewFolder.Click += new System.EventHandler(this.BtnNewFolder_Click);
+
             this.progressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.progressBar1.Height = 20;
+            this.progressBar1.Visible = false; // Mặc định ẩn, sẽ hiện khi tải file
 
             // Context Menu
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.menuDownload, this.menuDelete });
@@ -162,6 +168,7 @@ namespace Client.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 441);
             this.Controls.Add(this.listViewFiles);
+            this.Controls.Add(this.btnNewFolder);
             this.Controls.Add(this.btnUpload);
             this.Controls.Add(this.btnRefresh);
             this.Controls.Add(this.btnBack);

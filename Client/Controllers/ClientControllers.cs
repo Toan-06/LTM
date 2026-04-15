@@ -22,6 +22,9 @@ namespace Client.Controllers
         public Task<string> DeleteAsync(string ip, string user, string path) =>
             ClientService.DeleteAsync(ip, user, path);
 
+        public Task<string> RenameAsync(string ip, string user, string path, string newName) =>
+            ClientService.RenameAsync(ip, user, path, newName);
+
         public Task<string> UploadAsync(string ip, string user, string path, string filename, byte[] data) =>
             ClientService.UploadAsync(ip, user, path, filename, data);
 

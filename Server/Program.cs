@@ -13,6 +13,18 @@ namespace Server
             server.Start();
 
             Console.WriteLine("=== SERVER FILE STORAGE (LTM) ===");
+            
+            // Lấy và hiển thị IP LAN để đồng đội kết nối
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            Console.WriteLine("Các địa chỉ IP khả dụng trên máy này:");
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    Console.WriteLine($"- LAN IP: {ip}");
+                }
+            }
+            
             Console.WriteLine("Server đang chạy tại cổng 12345...");
 
             while (true)
@@ -35,7 +47,8 @@ namespace Server
                     string? req = await reader.ReadLineAsync();
                     if (req == null) break;
 
-                    Console.WriteLine($"Nhận: {req}");
+                    string displayReq = req.Length > 100 ? req.Substring(0, 100) + "..." : req;
+                    Console.WriteLine($"Nhận: {displayReq}");
                     string res = await CommandHandler.Handle(req);
                     await writer.WriteLineAsync(res);
                 }

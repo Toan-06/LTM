@@ -66,7 +66,10 @@ namespace Client.Forms
                 listViewFiles.Items.Clear();
 
                 foreach (string file in files)
-                    listViewFiles.Items.Add(file);
+                {
+                    if (!string.IsNullOrEmpty(file))
+                        listViewFiles.Items.Add(file);
+                }
             }
             catch (Exception ex)
             {
@@ -95,6 +98,7 @@ namespace Client.Forms
 
             try
             {
+                progressBar1.Visible = true; // [KẾT NỐI] Hiện thanh % của Giang
                 var (filename, data) = await _controllers.PrepareUpload(dlg.FileName);
 
                 string res = await _controllers.UploadAsync(txtIP.Text, currentUser, currentPath, filename, data);
@@ -104,6 +108,10 @@ namespace Client.Forms
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi upload: {ex.Message}");
+            }
+            finally
+            {
+                progressBar1.Visible = false; // [KẾT NỐI] Ẩn thanh % khi xong
             }
         }
 
@@ -147,7 +155,6 @@ namespace Client.Forms
                 return;
             }
 
-            // Xử lý tên qua Controller
             string filename = _controllers.ExtractName(fullItemName);
 
             using SaveFileDialog dlg = new SaveFileDialog();
@@ -157,13 +164,13 @@ namespace Client.Forms
 
             try
             {
+                progressBar1.Visible = true; // [KẾT NỐI] Hiện thanh %
                 string fullPath = _controllers.BuildPath(currentPath, filename);
 
                 byte[] data = await _controllers.DownloadAsync(txtIP.Text, currentUser, fullPath);
 
                 if (data != null)
                 {
-                    // Ghi file qua Controller
                     await _controllers.SaveFile(dlg.FileName, data);
                     MessageBox.Show($"Tải thành công!\n{data.Length} bytes");
                 }
@@ -175,6 +182,10 @@ namespace Client.Forms
             catch (Exception ex)
             {
                 MessageBox.Show($"Lỗi tải file:\n{ex.Message}");
+            }
+            finally
+            {
+                progressBar1.Visible = false; // [KẾT NỐI] Ẩn thanh %
             }
         }
 
@@ -192,20 +203,25 @@ namespace Client.Forms
             if (string.IsNullOrEmpty(currentPath) || currentPath == "/") 
                 return;
 
-            // Cắt chuỗi currentPath để quay lại thư mục cha
-            string trimPath = currentPath.TrimEnd('/');
-            int lastIndex = trimPath.LastIndexOf('/');
-            
-            if (lastIndex > 0)
+            try
             {
-                currentPath = trimPath.Substring(0, lastIndex);
-            }
-            else
-            {
-                currentPath = "/";
-            }
+                // [SỬA LỖI] Logic quay lại chuẩn xác hơn
+                string trimPath = currentPath.TrimEnd('/');
+                int lastIndex = trimPath.LastIndexOf('/');
+                
+                if (lastIndex >= 0)
+                {
+                    currentPath = trimPath.Substring(0, lastIndex);
+                    if (string.IsNullOrEmpty(currentPath)) currentPath = "/";
+                }
+                else
+                {
+                    currentPath = "/";
+                }
 
-            await LoadFiles(currentPath);
+                await LoadFiles(currentPath);
+            }
+            catch { await LoadFiles("/"); }
         }
 
         private async void ListViewFiles_DoubleClick(object sender, EventArgs e)

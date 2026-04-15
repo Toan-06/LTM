@@ -34,6 +34,7 @@ namespace Server
                     "DELETE" => p.Length >= 3 ? Delete(fileService, p[1], p[2]) : "ERROR|Thiếu đường dẫn xóa",
                     "UPLOAD" => p.Length == 5 ? await Upload(fileService, p[1], p[2], p[3], p[4]) : "ERROR|Thiếu dữ liệu file",
                     "DOWNLOAD" => p.Length >= 3 ? await Download(fileService, p[1], p[2]) : "ERROR|Thiếu đường dẫn tải",
+                    "RENAME" => p.Length == 4 ? Rename(fileService, p[1], p[2], p[3]) : "ERROR|Thiếu tên mới",
                     _ => "ERROR|Lệnh không hợp lệ"
                 };
             }
@@ -98,6 +99,13 @@ namespace Server
         {
             fileService.Delete(user, path);
             return "SUCCESS|Đã xóa thành công!";
+        }
+
+        // 8. Đổi tên file/thư mục
+        private static string Rename(FileService fileService, string user, string path, string newName)
+        {
+            fileService.Rename(user, path, newName);
+            return "SUCCESS|Đã đổi tên thành công!";
         }
     }
 }

@@ -57,6 +57,16 @@ namespace Client.Forms
         // LOGIC XỬ LÝ DỮ LIỆU
         // ==========================================
 
+        private void BtnLogout_Click(object sender, EventArgs e)
+        {
+            currentUser = "";
+            currentPath = "/";
+            listViewFiles.Items.Clear();
+            txtAddressBar.Text = "/";
+            panelLogin.Visible = true; // Hiện lại bảng đăng nhập
+            MessageBox.Show("Đã đăng xuất thành công!");
+        }
+
         // List file
 
         private async Task LoadFiles(string path)
@@ -79,13 +89,14 @@ namespace Client.Forms
                 {
                     if (string.IsNullOrEmpty(fileInfo)) continue;
 
-                    string[] parts = fileInfo.Split('|');
+                    string[] parts = fileInfo.Split('?');
+
                     if (parts.Length > 0)
                     {
                         var item = new ListViewItem(parts[0]); // Cột Tên
                         if (parts.Length >= 2) item.SubItems.Add(parts[1]); // Cột Kích thước
                         if (parts.Length >= 3) item.SubItems.Add(parts[2]); // Cột Ngày sửa đổi
-                        
+
                         listViewFiles.Items.Add(item);
                     }
                 }
@@ -248,7 +259,7 @@ namespace Client.Forms
 
         private async void BtnBack_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(currentPath) || currentPath == "/") 
+            if (string.IsNullOrEmpty(currentPath) || currentPath == "/")
                 return;
 
             try
@@ -256,7 +267,7 @@ namespace Client.Forms
                 // [SỬA LỖI] Logic quay lại chuẩn xác hơn
                 string trimPath = currentPath.TrimEnd('/');
                 int lastIndex = trimPath.LastIndexOf('/');
-                
+
                 if (lastIndex >= 0)
                 {
                     currentPath = trimPath.Substring(0, lastIndex);
@@ -283,12 +294,22 @@ namespace Client.Forms
 
             string folderName = _controllers.ExtractName(selectedItem);
             currentPath = _controllers.BuildPath(currentPath, folderName);
-            
+
             await LoadFiles(currentPath);
         }
 
-        private void Form_Main_Load(object sender, EventArgs e) 
-        { 
+        private void Form_Main_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void txtUser_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtPass_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

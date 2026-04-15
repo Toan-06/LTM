@@ -28,6 +28,7 @@ namespace Client.Forms
         private System.Windows.Forms.ToolStripMenuItem menuDownload;
         private System.Windows.Forms.ToolStripMenuItem menuDelete;
         private System.Windows.Forms.ToolStripMenuItem menuRename;
+        private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.ProgressBar progressBar1;
 
         /// <summary>
@@ -49,148 +50,255 @@ namespace Client.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            // Khởi tạo đồ hoạ Đăng nhập
-            this.panelLogin = new System.Windows.Forms.Panel();
-            this.txtIP = new System.Windows.Forms.TextBox();
-            this.txtUser = new System.Windows.Forms.TextBox();
-            this.txtPass = new System.Windows.Forms.TextBox();
-            this.btnLogin = new System.Windows.Forms.Button();
-            this.btnRegister = new System.Windows.Forms.Button();
-
-            // Khởi tạo đồ hoạ File
-            this.listViewFiles = new System.Windows.Forms.ListView();
-            this.colName = new System.Windows.Forms.ColumnHeader();
-            this.colSize = new System.Windows.Forms.ColumnHeader();
-            this.colDate = new System.Windows.Forms.ColumnHeader();
-            this.txtAddressBar = new System.Windows.Forms.TextBox();
-            this.btnBack = new System.Windows.Forms.Button();
-            this.btnUpload = new System.Windows.Forms.Button();
-            this.btnNewFolder = new System.Windows.Forms.Button();
-            this.btnRefresh = new System.Windows.Forms.Button();
-            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.menuDownload = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuRename = new System.Windows.Forms.ToolStripMenuItem();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            
-            this.panelLogin.SuspendLayout();
-            this.contextMenuStrip.SuspendLayout();
-            this.SuspendLayout();
-
-            // Cấu hình Panel Đăng nhập (Nằm ở trên đầu)
-            this.panelLogin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.panelLogin.Controls.Add(this.txtIP);
-            this.panelLogin.Controls.Add(this.txtUser);
-            this.panelLogin.Controls.Add(this.txtPass);
-            this.panelLogin.Controls.Add(this.btnLogin);
-            this.panelLogin.Controls.Add(this.btnRegister);
-            this.panelLogin.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelLogin.Location = new System.Drawing.Point(0, 0);
-            this.panelLogin.Name = "panelLogin";
-            this.panelLogin.Size = new System.Drawing.Size(784, 50);
-            
-            this.txtIP.Text = "127.0.0.1";
-            this.txtIP.Location = new System.Drawing.Point(10, 15);
-            this.txtIP.Size = new System.Drawing.Size(100, 23);
-            
-            this.txtUser.PlaceholderText = "Username";
-            this.txtUser.Location = new System.Drawing.Point(120, 15);
-            this.txtUser.Size = new System.Drawing.Size(120, 23);
-            
-            this.txtPass.PlaceholderText = "Password";
-            this.txtPass.PasswordChar = '*';
-            this.txtPass.Location = new System.Drawing.Point(250, 15);
-            this.txtPass.Size = new System.Drawing.Size(120, 23);
-
-            this.btnLogin.Text = "Đăng Nhập";
-            this.btnLogin.BackColor = System.Drawing.Color.DarkCyan;
-            this.btnLogin.ForeColor = System.Drawing.Color.White;
-            this.btnLogin.Location = new System.Drawing.Point(380, 13);
-            this.btnLogin.Size = new System.Drawing.Size(100, 28);
-            this.btnLogin.Click += new System.EventHandler(this.BtnLogin_Socket_Click);
-
-            this.btnRegister.Text = "Đăng Ký";
-            this.btnRegister.Location = new System.Drawing.Point(490, 13);
-            this.btnRegister.Size = new System.Drawing.Size(100, 28);
-            this.btnRegister.Click += new System.EventHandler(this.BtnRegister_Socket_Click);
-
-            // Cấu hình ListView và AddressBar (Dịch xuống dưới Panel)
-            this.txtAddressBar.Location = new System.Drawing.Point(50, 60);
-            this.txtAddressBar.Size = new System.Drawing.Size(400, 23);
-            this.txtAddressBar.Text = "/";
-
-            this.listViewFiles.Location = new System.Drawing.Point(10, 95);
-            this.listViewFiles.Size = new System.Drawing.Size(764, 300);
-            this.listViewFiles.View = System.Windows.Forms.View.Details;
-            this.listViewFiles.FullRowSelect = true;
-            this.listViewFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colName, this.colSize, this.colDate });
-            this.listViewFiles.DoubleClick += new System.EventHandler(this.ListViewFiles_DoubleClick);
-            this.listViewFiles.ContextMenuStrip = this.contextMenuStrip;
-
-            // Cấu hình Text và Size cho các cột để người dùng có thể xem được Data
-            this.colName.Text = "Tên file/thư mục";
-            this.colName.Width = 350;
-            this.colSize.Text = "Kích thước";
-            this.colSize.Width = 120;
-            this.colDate.Text = "Ngày sửa đổi";
-            this.colDate.Width = 200;
-
-            this.btnBack.Location = new System.Drawing.Point(10, 58);
-            this.btnBack.Size = new System.Drawing.Size(35, 25);
-            this.btnBack.Text = "<";
-            this.btnBack.Click += new System.EventHandler(this.BtnBack_Click);
-
-            this.btnRefresh.Location = new System.Drawing.Point(460, 58);
-            this.btnRefresh.Size = new System.Drawing.Size(75, 25);
-            this.btnRefresh.Text = "Làm mới";
-            this.btnRefresh.Click += new System.EventHandler(this.BtnRefresh_Click);
-
-            this.btnUpload.Text = "Tải lên";
-            this.btnUpload.Click += new System.EventHandler(this.BtnUpload_Click);
-
-            this.btnNewFolder.Location = new System.Drawing.Point(630, 58);
-            this.btnNewFolder.Size = new System.Drawing.Size(95, 25);
-            this.btnNewFolder.Text = "Thư mục mới";
-            this.btnNewFolder.Click += new System.EventHandler(this.BtnNewFolder_Click);
-
-            this.progressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.progressBar1.Height = 20;
-            this.progressBar1.Visible = false; // Mặc định ẩn, sẽ hiện khi tải file
-
-            // Context Menu
-            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 
-                this.menuDownload, 
-                this.menuRename, 
-                this.menuDelete 
-            });
-            this.menuDownload.Text = "Tải về";
-            this.menuDownload.Click += new System.EventHandler(this.MenuDownload_Click);
-            this.menuRename.Text = "Đổi tên";
-            this.menuRename.Click += new System.EventHandler(this.MenuRename_Click);
-            this.menuDelete.Text = "Xóa";
-            this.menuDelete.Click += new System.EventHandler(this.MenuDelete_Click);
-
-            // Bơm mọi thứ vào Form_Main
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 441);
-            this.Controls.Add(this.listViewFiles);
-            this.Controls.Add(this.btnNewFolder);
-            this.Controls.Add(this.btnUpload);
-            this.Controls.Add(this.btnRefresh);
-            this.Controls.Add(this.btnBack);
-            this.Controls.Add(this.txtAddressBar);
-            this.Controls.Add(this.panelLogin);
-            this.Controls.Add(this.progressBar1);
-            this.Name = "Form_Main";
-            this.Text = "File Storage Client (LTM)";
-            this.Load += new System.EventHandler(this.Form_Main_Load);
-            this.panelLogin.ResumeLayout(false);
-            this.panelLogin.PerformLayout();
-            this.contextMenuStrip.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            components = new System.ComponentModel.Container();
+            panelLogin = new Panel();
+            txtIP = new TextBox();
+            txtUser = new TextBox();
+            txtPass = new TextBox();
+            btnLogin = new Button();
+            btnRegister = new Button();
+            listViewFiles = new ListView();
+            colName = new ColumnHeader();
+            colSize = new ColumnHeader();
+            colDate = new ColumnHeader();
+            contextMenuStrip = new ContextMenuStrip(components);
+            menuDownload = new ToolStripMenuItem();
+            menuRename = new ToolStripMenuItem();
+            menuDelete = new ToolStripMenuItem();
+            txtAddressBar = new TextBox();
+            btnBack = new Button();
+            btnUpload = new Button();
+            btnNewFolder = new Button();
+            btnRefresh = new Button();
+            btnLogout = new Button();
+            progressBar1 = new ProgressBar();
+            panelLogin.SuspendLayout();
+            contextMenuStrip.SuspendLayout();
+            SuspendLayout();
+            // 
+            // panelLogin
+            // 
+            panelLogin.BackColor = Color.FromArgb(45, 45, 48);
+            panelLogin.Controls.Add(txtIP);
+            panelLogin.Controls.Add(txtUser);
+            panelLogin.Controls.Add(txtPass);
+            panelLogin.Controls.Add(btnLogin);
+            panelLogin.Controls.Add(btnRegister);
+            panelLogin.Dock = DockStyle.Top;
+            panelLogin.Location = new Point(0, 0);
+            panelLogin.Margin = new Padding(3, 4, 3, 4);
+            panelLogin.Name = "panelLogin";
+            panelLogin.Size = new Size(896, 67);
+            panelLogin.TabIndex = 7;
+            // 
+            // txtIP
+            // 
+            txtIP.Location = new Point(80, 20);
+            txtIP.Margin = new Padding(3, 4, 3, 4);
+            txtIP.Name = "txtIP";
+            txtIP.Size = new Size(114, 27);
+            txtIP.TabIndex = 0;
+            txtIP.Text = "127.0.0.1";
+            // 
+            // txtUser
+            // 
+            txtUser.Location = new Point(225, 21);
+            txtUser.Margin = new Padding(3, 4, 3, 4);
+            txtUser.Name = "txtUser";
+            txtUser.PlaceholderText = "Username";
+            txtUser.Size = new Size(137, 27);
+            txtUser.TabIndex = 1;
+            txtUser.TextChanged += txtUser_TextChanged;
+            // 
+            // txtPass
+            // 
+            txtPass.Location = new Point(393, 20);
+            txtPass.Margin = new Padding(3, 4, 3, 4);
+            txtPass.Name = "txtPass";
+            txtPass.PasswordChar = '*';
+            txtPass.PlaceholderText = "Password";
+            txtPass.Size = new Size(137, 27);
+            txtPass.TabIndex = 2;
+            txtPass.TextChanged += txtPass_TextChanged;
+            // 
+            // btnLogin
+            // 
+            btnLogin.BackColor = Color.DarkCyan;
+            btnLogin.ForeColor = Color.White;
+            btnLogin.Location = new Point(565, 15);
+            btnLogin.Margin = new Padding(3, 4, 3, 4);
+            btnLogin.Name = "btnLogin";
+            btnLogin.Size = new Size(114, 37);
+            btnLogin.TabIndex = 3;
+            btnLogin.Text = "Đăng Nhập";
+            btnLogin.UseVisualStyleBackColor = false;
+            btnLogin.Click += BtnLogin_Socket_Click;
+            // 
+            // btnRegister
+            // 
+            btnRegister.BackColor = Color.DarkCyan;
+            btnRegister.ForeColor = SystemColors.ControlLightLight;
+            btnRegister.Location = new Point(709, 15);
+            btnRegister.Margin = new Padding(3, 4, 3, 4);
+            btnRegister.Name = "btnRegister";
+            btnRegister.Size = new Size(114, 37);
+            btnRegister.TabIndex = 4;
+            btnRegister.Text = "Đăng Ký";
+            btnRegister.UseVisualStyleBackColor = false;
+            btnRegister.Click += BtnRegister_Socket_Click;
+            // 
+            // listViewFiles
+            // 
+            listViewFiles.Columns.AddRange(new ColumnHeader[] { colName, colSize, colDate });
+            listViewFiles.ContextMenuStrip = contextMenuStrip;
+            listViewFiles.FullRowSelect = true;
+            listViewFiles.Location = new Point(11, 127);
+            listViewFiles.Margin = new Padding(3, 4, 3, 4);
+            listViewFiles.Name = "listViewFiles";
+            listViewFiles.Size = new Size(873, 399);
+            listViewFiles.TabIndex = 1;
+            listViewFiles.UseCompatibleStateImageBehavior = false;
+            listViewFiles.View = View.Details;
+            listViewFiles.DoubleClick += ListViewFiles_DoubleClick;
+            // 
+            // colName
+            // 
+            colName.Text = "Tên file/thư mục";
+            colName.Width = 350;
+            // 
+            // colSize
+            // 
+            colSize.Text = "Kích thước";
+            colSize.Width = 120;
+            // 
+            // colDate
+            // 
+            colDate.Text = "Ngày sửa đổi";
+            colDate.Width = 200;
+            // 
+            // contextMenuStrip
+            // 
+            contextMenuStrip.ImageScalingSize = new Size(20, 20);
+            contextMenuStrip.Items.AddRange(new ToolStripItem[] { menuDownload, menuRename, menuDelete });
+            contextMenuStrip.Name = "contextMenuStrip";
+            contextMenuStrip.Size = new Size(128, 76);
+            // 
+            // menuDownload
+            // 
+            menuDownload.Name = "menuDownload";
+            menuDownload.Size = new Size(127, 24);
+            menuDownload.Text = "Tải về";
+            menuDownload.Click += MenuDownload_Click;
+            // 
+            // menuRename
+            // 
+            menuRename.Name = "menuRename";
+            menuRename.Size = new Size(127, 24);
+            menuRename.Text = "Đổi tên";
+            menuRename.Click += MenuRename_Click;
+            // 
+            // menuDelete
+            // 
+            menuDelete.Name = "menuDelete";
+            menuDelete.Size = new Size(127, 24);
+            menuDelete.Text = "Xóa";
+            menuDelete.Click += MenuDelete_Click;
+            // 
+            // txtAddressBar
+            // 
+            txtAddressBar.Location = new Point(57, 80);
+            txtAddressBar.Margin = new Padding(3, 4, 3, 4);
+            txtAddressBar.Name = "txtAddressBar";
+            txtAddressBar.Size = new Size(393, 27);
+            txtAddressBar.TabIndex = 6;
+            txtAddressBar.Text = "/";
+            // 
+            // btnBack
+            // 
+            btnBack.Location = new Point(11, 77);
+            btnBack.Margin = new Padding(3, 4, 3, 4);
+            btnBack.Name = "btnBack";
+            btnBack.Size = new Size(40, 33);
+            btnBack.TabIndex = 5;
+            btnBack.Text = "<";
+            btnBack.Click += BtnBack_Click;
+            // 
+            // btnUpload
+            // 
+            btnUpload.Location = new Point(548, 77);
+            btnUpload.Margin = new Padding(3, 4, 3, 4);
+            btnUpload.Name = "btnUpload";
+            btnUpload.Size = new Size(86, 33);
+            btnUpload.TabIndex = 3;
+            btnUpload.Text = "Tải lên";
+            btnUpload.Click += BtnUpload_Click;
+            // 
+            // btnNewFolder
+            // 
+            btnNewFolder.Location = new Point(640, 77);
+            btnNewFolder.Margin = new Padding(3, 4, 3, 4);
+            btnNewFolder.Name = "btnNewFolder";
+            btnNewFolder.Size = new Size(109, 33);
+            btnNewFolder.TabIndex = 2;
+            btnNewFolder.Text = "Thư mục mới";
+            btnNewFolder.Click += BtnNewFolder_Click;
+            // 
+            // btnRefresh
+            // 
+            btnRefresh.Location = new Point(456, 77);
+            btnRefresh.Margin = new Padding(3, 4, 3, 4);
+            btnRefresh.Name = "btnRefresh";
+            btnRefresh.Size = new Size(86, 33);
+            btnRefresh.TabIndex = 4;
+            btnRefresh.Text = "Làm mới";
+            btnRefresh.Click += BtnRefresh_Click;
+            // 
+            // btnLogout
+            // 
+            btnLogout.BackColor = Color.Red;
+            btnLogout.ForeColor = Color.White;
+            btnLogout.Location = new Point(790, 527);
+            btnLogout.Margin = new Padding(3, 4, 3, 4);
+            btnLogout.Name = "btnLogout";
+            btnLogout.Size = new Size(95, 33);
+            btnLogout.TabIndex = 9;
+            btnLogout.Text = "Đăng xuất";
+            btnLogout.UseVisualStyleBackColor = false;
+            btnLogout.Click += BtnLogout_Click;
+            // 
+            // progressBar1
+            // 
+            progressBar1.Dock = DockStyle.Bottom;
+            progressBar1.Location = new Point(0, 561);
+            progressBar1.Margin = new Padding(3, 4, 3, 4);
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(896, 27);
+            progressBar1.TabIndex = 8;
+            progressBar1.Visible = false;
+            // 
+            // Form_Main
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(896, 588);
+            Controls.Add(listViewFiles);
+            Controls.Add(btnNewFolder);
+            Controls.Add(btnUpload);
+            Controls.Add(btnRefresh);
+            Controls.Add(btnLogout);
+            Controls.Add(btnBack);
+            Controls.Add(txtAddressBar);
+            Controls.Add(panelLogin);
+            Controls.Add(progressBar1);
+            Margin = new Padding(3, 4, 3, 4);
+            Name = "Form_Main";
+            Text = "File Storage Client (LTM)";
+            Load += Form_Main_Load;
+            panelLogin.ResumeLayout(false);
+            panelLogin.PerformLayout();
+            contextMenuStrip.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

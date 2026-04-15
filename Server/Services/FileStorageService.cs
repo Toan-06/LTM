@@ -42,15 +42,35 @@ namespace Server.Services
             Directory.CreateDirectory(GetPath(user, subPath));
         }
 
-        // Liệt kê file/thư mục
+        // Liệt kê file/thư mục (Có kèm kích thước và ngày)
         public string[] List(string user, string subPath = "")
         {
             string p = GetPath(user, subPath);
             if (!Directory.Exists(p)) return new string[] { "Thư mục không tồn tại" };
-            
+
             return Directory.GetFileSystemEntries(p)
-                            .Select(x => (Directory.Exists(x) ? "[D] " : "[F] ") + Path.GetFileName(x))
+                            .Select(x => {
+                                var info = new FileInfo(x);
+                                string type = Directory.Exists(x) ? "[D] " : "[F] ";
+                                string name = type + Path.GetFileName(x);
+                                string size = Directory.Exists(x) ? "" : FormatSize(info.Length);
+                                string date = info.LastWriteTime.ToString("dd/MM/yyyy HH:mm");
+                                return $"{name}|{size}|{date}";
+                            })
                             .ToArray();
+        }
+
+        private string FormatSize(long bytes)
+        {
+            string[] units = { "B", "KB", "MB", "GB" };
+            double len = bytes;
+            int unitIndex = 0;
+            while (len >= 1024 && unitIndex < units.Length - 1)
+            {
+                len /= 1024;
+                unitIndex++;
+            }
+            return $"{len:N1} {units[unitIndex]}";
         }
 
         // Lưu file (Từ mảng byte)

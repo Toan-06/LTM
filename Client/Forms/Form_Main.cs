@@ -25,22 +25,32 @@ namespace Client.Forms
         // Bạn (Người 1) đã làm sẵn logic Đăng nhập/Đăng ký để nhóm có thể kết nối được Server
         private async void BtnLogin_Socket_Click(object sender, EventArgs e)
         {
-            // Truyền txtIP.Text vào hàm Send để kết nối động theo đúng yêu cầu
-            string res = await _controllers.LoginAsync(txtIP.Text, txtUser.Text, txtPass.Text);
-
-            if (res.StartsWith("LOGIN_OK"))
+            try
             {
-                currentUser = res.Split('|')[1];
-                MessageBox.Show($"Đã kết nối! Chào mừng {currentUser}.");
-                await LoadFiles(currentPath); // Gọi hàm tải file
+                progressBar1.Visible = true;
+                string res = await _controllers.LoginAsync(txtIP.Text, txtUser.Text, txtPass.Text);
+
+                if (res.StartsWith("LOGIN_OK"))
+                {
+                    currentUser = res.Split('|')[1];
+                    panelLogin.Visible = false; // [HOÀN THIỆN] Ẩn bảng đăng nhập cho đẹp
+                    MessageBox.Show($"Đã kết nối! Chào mừng {currentUser}.");
+                    await LoadFiles(currentPath);
+                }
+                else MessageBox.Show("Lỗi: " + res);
             }
-            else MessageBox.Show("Lỗi: " + res);
+            finally { progressBar1.Visible = false; }
         }
 
         private async void BtnRegister_Socket_Click(object sender, EventArgs e)
         {
-            string res = await _controllers.RegisterAsync(txtIP.Text, txtUser.Text, txtPass.Text);
-            MessageBox.Show(res);
+            try
+            {
+                progressBar1.Visible = true;
+                string res = await _controllers.RegisterAsync(txtIP.Text, txtUser.Text, txtPass.Text);
+                MessageBox.Show(res);
+            }
+            finally { progressBar1.Visible = false; }
         }
 
         // ==========================================
@@ -65,10 +75,19 @@ namespace Client.Forms
                 string[] files = await _controllers.ListFilesAsync(txtIP.Text, currentUser, currentPath);
                 listViewFiles.Items.Clear();
 
-                foreach (string file in files)
+                foreach (string fileInfo in files)
                 {
-                    if (!string.IsNullOrEmpty(file))
-                        listViewFiles.Items.Add(file);
+                    if (string.IsNullOrEmpty(fileInfo)) continue;
+
+                    string[] parts = fileInfo.Split('|');
+                    if (parts.Length > 0)
+                    {
+                        var item = new ListViewItem(parts[0]); // Cột Tên
+                        if (parts.Length >= 2) item.SubItems.Add(parts[1]); // Cột Kích thước
+                        if (parts.Length >= 3) item.SubItems.Add(parts[2]); // Cột Ngày sửa đổi
+                        
+                        listViewFiles.Items.Add(item);
+                    }
                 }
             }
             catch (Exception ex)
@@ -196,7 +215,7 @@ namespace Client.Forms
                 progressBar1.Visible = true; // [KẾT NỐI] Hiện thanh %
                 string fullPath = _controllers.BuildPath(currentPath, filename);
 
-                byte[] data = await _controllers.DownloadAsync(txtIP.Text, currentUser, fullPath);
+                byte[]? data = await _controllers.DownloadAsync(txtIP.Text, currentUser, fullPath);
 
                 if (data != null)
                 {

@@ -89,7 +89,7 @@ namespace Server
         // 6. Tải file về
         private static async Task<string> Download(FileService fileService, string user, string path)
         {
-            byte[] data = await fileService.ReadFile(user, path);
+            byte[]? data = await fileService.ReadFile(user, path);
             if (data == null) return "ERROR|File không tồn tại";
             return "DOWNLOAD_OK|" + Convert.ToBase64String(data);
         }

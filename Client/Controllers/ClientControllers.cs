@@ -28,7 +28,7 @@ namespace Client.Controllers
         public Task<string> UploadAsync(string ip, string user, string path, string filename, byte[] data) =>
             ClientService.UploadAsync(ip, user, path, filename, data);
 
-        public Task<byte[]> DownloadAsync(string ip, string user, string path) =>
+        public Task<byte[]?> DownloadAsync(string ip, string user, string path) =>
             ClientService.DownloadAsync(ip, user, path);
 
         // ===== LOGIC MVC =====

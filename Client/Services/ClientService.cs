@@ -39,7 +39,7 @@ namespace Client.Services
             return SendAsync(ip, $"UPLOAD|{username}|{path}|{filename}|{base64}");
         }
 
-        public static async Task<byte[]> DownloadAsync(string ip, string username, string path)
+        public static async Task<byte[]?> DownloadAsync(string ip, string username, string path)
         {
             string res = await SendAsync(ip, $"DOWNLOAD|{username}|{path}");
             if (res.StartsWith("DOWNLOAD_OK|"))

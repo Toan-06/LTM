@@ -2,7 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\FileStorageApp",
-    "\\FileStorageApp\\Client"
+    "\\FileStorageApp\\Client",
+    "\\FileStorageApp\\Client\\Services",
+    "\\FileStorageApp\\Server",
+    "\\FileStorageApp\\Server\\Data",
+    "\\FileStorageApp\\Server\\Models",
+    "\\FileStorageApp\\Server\\Properties",
+    "\\FileStorageApp\\Server\\Services"
   ],
+  "SelectedNode": "\\FileStorageApp\\Server",
   "PreviewInSolutionExplorer": false
 }

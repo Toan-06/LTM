@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Server.Data;
+
 
 namespace Server
 {
@@ -11,6 +13,13 @@ namespace Server
             Console.OutputEncoding = Encoding.UTF8;
             TcpListener server = new TcpListener(IPAddress.Any, 12345);
             server.Start();
+
+            // Tự động tạo cơ sở dữ liệu và bảng nếu chưa có
+            using (var db = new AppDbContext())
+            {
+                db.Database.EnsureCreated();
+            }
+
 
             Console.WriteLine("=== SERVER FILE STORAGE (LTM) ===");
             Console.WriteLine("Server đang chạy tại cổng 12345...");

@@ -27,6 +27,7 @@ namespace Client.Forms
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem menuDownload;
         private System.Windows.Forms.ToolStripMenuItem menuDelete;
+        private System.Windows.Forms.ToolStripMenuItem menuRename;
         private System.Windows.Forms.ProgressBar progressBar1;
 
         /// <summary>
@@ -70,6 +71,7 @@ namespace Client.Forms
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuDownload = new System.Windows.Forms.ToolStripMenuItem();
             this.menuDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuRename = new System.Windows.Forms.ToolStripMenuItem();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             
             this.panelLogin.SuspendLayout();
@@ -157,9 +159,15 @@ namespace Client.Forms
             this.progressBar1.Visible = false; // Mặc định ẩn, sẽ hiện khi tải file
 
             // Context Menu
-            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.menuDownload, this.menuDelete });
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 
+                this.menuDownload, 
+                this.menuRename, 
+                this.menuDelete 
+            });
             this.menuDownload.Text = "Tải về";
             this.menuDownload.Click += new System.EventHandler(this.MenuDownload_Click);
+            this.menuRename.Text = "Đổi tên";
+            this.menuRename.Click += new System.EventHandler(this.MenuRename_Click);
             this.menuDelete.Text = "Xóa";
             this.menuDelete.Click += new System.EventHandler(this.MenuDelete_Click);
 

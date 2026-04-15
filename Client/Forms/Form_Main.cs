@@ -138,6 +138,35 @@ namespace Client.Forms
             }
         }
 
+        // RENAME
+
+        private async void MenuRename_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Chọn file/thư mục để đổi tên!");
+                return;
+            }
+
+            string fullItemName = listViewFiles.SelectedItems[0].Text;
+            string oldName = _controllers.ExtractName(fullItemName);
+            string oldPath = _controllers.BuildPath(currentPath, oldName);
+
+            string newName = Interaction.InputBox($"Đổi tên '{oldName}' thành:", "Cập nhật", oldName);
+            if (string.IsNullOrEmpty(newName) || newName == oldName) return;
+
+            try
+            {
+                string res = await _controllers.RenameAsync(txtIP.Text, currentUser, oldPath, newName);
+                MessageBox.Show(res);
+                await LoadFiles(currentPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi đổi tên:\n{ex.Message}");
+            }
+        }
+
         // DOWNLOAD
 
         private async void MenuDownload_Click(object sender, EventArgs e)

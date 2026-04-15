@@ -33,22 +33,6 @@ namespace Client.Forms
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-             // ===== TODO (Giao Diện - GIANG): HƯỚNG DẪN CĂN BẢNG EXPLORER CHI TIẾT =====
-            /*
-             * Giang ơi, đây là trái tim của giao diện hiển thị dữ liệu Server.
-             * 
-             * GIAI ĐOẠN 1: MỞ CHẾ ĐỘ DESIGNER
-             * - B1: Tới Solution Explorer bên phải (Cột Quản lý File). Mở file `Form_Main.cs` (Bằng cách đúp chuột vào cái Icon Cửa Sổ hình thoi bên cạnh nó).
-             * - B2: Bảng vẽ Thiết kế sẽ hiện lên.
-             * 
-             * GIAI ĐOẠN 2: XẾP HÌNH! CẦM KÉO QUĂNG THẢ 
-             * - B1: Ấn F4 để gọi bảng Properties ra.
-             * - B2: Quăng cái ListView trắng (listViewFiles) ra nằm choán lấy phần bụng bản vẽ. Ấn F4, kéo xuống kiếm dòng cờ `View`, Đổi cái mâm nó thành chữ `Details`. Kiếm dòng `FullRowSelect` bằng True.
-             * - B3: Các nút bấm Giang hãy đổi màu (BackColor) và cỡ chữ (Font) cho lung linh nhé.
-             * 
-             * GIAI ĐOẠN 3: LƯU TRỮ VÀ THĂNG HOA
-             * Ctr+S ấn chốt sổ để Visual Studio tự lưu tọa độ vào đây. Chúc UI của Giang hoành tráng!
-             */
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -139,6 +123,14 @@ namespace Client.Forms
             this.listViewFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colName, this.colSize, this.colDate });
             this.listViewFiles.DoubleClick += new System.EventHandler(this.ListViewFiles_DoubleClick);
             this.listViewFiles.ContextMenuStrip = this.contextMenuStrip;
+
+            // Cấu hình Text và Size cho các cột để người dùng có thể xem được Data
+            this.colName.Text = "Tên file/thư mục";
+            this.colName.Width = 350;
+            this.colSize.Text = "Kích thước";
+            this.colSize.Width = 120;
+            this.colDate.Text = "Ngày sửa đổi";
+            this.colDate.Width = 200;
 
             this.btnBack.Location = new System.Drawing.Point(10, 58);
             this.btnBack.Size = new System.Drawing.Size(35, 25);

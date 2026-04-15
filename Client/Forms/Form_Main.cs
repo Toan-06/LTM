@@ -178,34 +178,53 @@ namespace Client.Forms
             }
         }
 
-           /** 
-
         // ==========================================
         // GIAO DIỆN & TƯƠNG TÁC
         // ==========================================
 
-        private void BtnRefresh_Click(object sender, EventArgs e)
+        private async void BtnRefresh_Click(object sender, EventArgs e)
         {
-            // TODO (Giang): Gọi lại hàm LoadFiles(currentPath) để làm mới màn hình.
+            await LoadFiles(currentPath);
         }
 
-        private void BtnBack_Click(object sender, EventArgs e)
+        private async void BtnBack_Click(object sender, EventArgs e)
         {
-            // TODO (Giang): Xử lý cắt chuỗi currentPath để quay lại thư mục cha (Dùng LastIndexOf).
+            if (string.IsNullOrEmpty(currentPath) || currentPath == "/") 
+                return;
+
+            // Cắt chuỗi currentPath để quay lại thư mục cha
+            string trimPath = currentPath.TrimEnd('/');
+            int lastIndex = trimPath.LastIndexOf('/');
+            
+            if (lastIndex > 0)
+            {
+                currentPath = trimPath.Substring(0, lastIndex);
+            }
+            else
+            {
+                currentPath = "/";
+            }
+
+            await LoadFiles(currentPath);
         }
 
-        private void ListViewFiles_DoubleClick(object sender, EventArgs e)
+        private async void ListViewFiles_DoubleClick(object sender, EventArgs e)
         {
-            // TODO (Giang): Lấy tên Item đang được click đúp, nối vào currentPath và gọi LoadFiles.
+            if (listViewFiles.SelectedItems.Count == 0) return;
+
+            string selectedItem = listViewFiles.SelectedItems[0].Text;
+
+            // Tránh việc ghép tên file nếu nó không phải là thư mục (giả sử file bắt đầu với [F])
+            if (selectedItem.StartsWith("[F] ")) return;
+
+            string folderName = _controllers.ExtractName(selectedItem);
+            currentPath = _controllers.BuildPath(currentPath, folderName);
+            
+            await LoadFiles(currentPath);
         }
 
-        private void MenuDownload_Click(object sender, EventArgs e)
-        {
-            // TODO (Giang): Mở SaveFileDialog để người dùng chọn chỗ lưu file trên máy mình.
-            // (Phần tải dữ liệu thật sẽ do Trang gọi API Download).
+        private void Form_Main_Load(object sender, EventArgs e) 
+        { 
         }
-
-        private void Form_Main_Load(object sender, EventArgs e) { }
     }
-} 
-    **/
+}

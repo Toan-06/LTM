@@ -11,10 +11,15 @@ namespace Server
 {
     // LOGIC SERVER (BẠN - NGƯỜI 1 QUẢN LÝ)
     // Đây là nơi xử lý toàn bộ yêu cầu từ Client gửi lên
+    public class AuthContext
+    {
+        public string? Username { get; set; }
+    }
+
     public static class CommandHandler
     {
 
-        public static async Task<string> Handle(string req)
+        public static async Task<string> Handle(string req, AuthContext context)
         {
             try
             {
@@ -25,7 +30,18 @@ namespace Server
                 string[] p = req.Split('|');
                 string cmd = p[0].ToUpper();
 
-                return cmd switch
+                // KIỂM TRA QUYỀN TRUY CẬP (SESSION)
+                if (cmd != "LOGIN" && cmd != "REGISTER")
+                {
+                    if (string.IsNullOrEmpty(context.Username))
+                        return "ERROR|Chưa đăng nhập. Vui lòng kết nối và đăng nhập trước!";
+
+                    // Bảo mật: Đảm bảo user gửi trong lệnh khớp với session đã đăng nhập
+                    if (p.Length > 1 && p[1] != context.Username)
+                        return "ERROR|Yêu cầu không hợp lệ. Bạn không thể thực hiện lệnh cho tài khoản khác!";
+                }
+
+                string response = cmd switch
                 {
                     "REGISTER" => p.Length == 3 ? Register(db, fileService, p[1], p[2]) : "ERROR|Thiếu thông tin đăng ký",
                     "LOGIN" => p.Length == 3 ? Login(db, p[1], p[2]) : "ERROR|Thiếu thông tin đăng nhập",
@@ -37,6 +53,14 @@ namespace Server
                     "RENAME" => p.Length == 4 ? Rename(fileService, p[1], p[2], p[3]) : "ERROR|Thiếu tên mới",
                     _ => "ERROR|Lệnh không hợp lệ"
                 };
+
+                // Cập nhật session nếu đăng nhập/đăng ký thành công
+                if (response.StartsWith("LOGIN_OK|") || response.StartsWith("SUCCESS|Đăng ký tài khoản thành công!"))
+                {
+                    context.Username = p[1];
+                }
+
+                return response;
             }
             catch (Exception ex)
             {

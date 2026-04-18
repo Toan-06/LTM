@@ -114,6 +114,12 @@ namespace Client.Forms
 
         private async void BtnNewFolder_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                MessageBox.Show("Vui lòng đăng nhập để sử dụng tính năng này!");
+                return;
+            }
+
             string folderName = Interaction.InputBox("Tên thư mục:", "Tạo mới");
             if (string.IsNullOrEmpty(folderName)) return;
 
@@ -126,6 +132,12 @@ namespace Client.Forms
 
         private async void BtnUpload_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                MessageBox.Show("Vui lòng đăng nhập trước khi tải tập tin!");
+                return;
+            }
+
             using OpenFileDialog dlg = new OpenFileDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
 
@@ -152,6 +164,12 @@ namespace Client.Forms
 
         private async void MenuDelete_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                MessageBox.Show("Bạn cần đăng nhập để thực hiện xóa!");
+                return;
+            }
+
             if (listViewFiles.SelectedItems.Count == 0)
             {
                 MessageBox.Show("Chọn file/thư mục!");
@@ -175,6 +193,12 @@ namespace Client.Forms
 
         private async void MenuRename_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                MessageBox.Show("Vui lòng đăng nhập để đổi tên!");
+                return;
+            }
+
             if (listViewFiles.SelectedItems.Count == 0)
             {
                 MessageBox.Show("Chọn file/thư mục để đổi tên!");
@@ -204,6 +228,12 @@ namespace Client.Forms
 
         private async void MenuDownload_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(currentUser))
+            {
+                MessageBox.Show("Vui lòng đăng nhập để tải xuống!");
+                return;
+            }
+
             if (listViewFiles.SelectedItems.Count == 0)
             {
                 MessageBox.Show("Chọn file để tải!");

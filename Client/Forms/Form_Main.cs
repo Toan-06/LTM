@@ -36,6 +36,14 @@ namespace Client.Forms
                     panelLogin.Visible = false; // [HOÀN THIỆN] Ẩn bảng đăng nhập cho đẹp
                     btnLogout.Visible = true;   // Hiện nút Đăng xuất
                     btnLogout.BringToFront();   // Đảm bảo hiển thị trên cùng
+                    
+                    // Thêm chữ chào mừng vào header (Tiêu đề Form)
+                    this.Text = $"Chào mừng {currentUser}";
+                    
+                    // Xóa trắng 2 ô textbox sau khi đăng nhập
+                    txtUser.Text = "";
+                    txtPass.Text = "";
+
                     MessageBox.Show($"Đã kết nối! Chào mừng {currentUser}.");
                     await LoadFiles(currentPath);
                 }
@@ -67,6 +75,7 @@ namespace Client.Forms
             txtAddressBar.Text = "/";
             btnLogout.Visible = false; // Ẩn nút Đăng xuất
             panelLogin.Visible = true; // Hiện lại bảng đăng nhập
+            this.Text = "File Storage App"; // Đặt lại tiêu đề mặc định
             MessageBox.Show("Đã đăng xuất thành công!");
         }
 

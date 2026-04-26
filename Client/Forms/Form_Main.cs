@@ -33,12 +33,20 @@ namespace Client.Forms
                 if (res.StartsWith("LOGIN_OK"))
                 {
                     currentUser = res.Split('|')[1];
-                    panelLogin.Visible = false; // [HOÀN THIỆN] Ẩn bảng đăng nhập cho đẹp
+                    
+                    // Ẩn các control đăng nhập
+                    txtIP.Visible = false;
+                    txtUser.Visible = false;
+                    txtPass.Visible = false;
+                    btnLogin.Visible = false;
+                    btnRegister.Visible = false;
+
+                    // Hiện chữ chào mừng thay thế vị trí LAN IP
+                    lblWelcome.Text = $"Chào mừng {currentUser}";
+                    lblWelcome.Visible = true;
+
                     btnLogout.Visible = true;   // Hiện nút Đăng xuất
                     btnLogout.BringToFront();   // Đảm bảo hiển thị trên cùng
-                    
-                    // Thêm chữ chào mừng vào header (Tiêu đề Form)
-                    this.Text = $"Chào mừng {currentUser}";
                     
                     // Xóa trắng 2 ô textbox sau khi đăng nhập
                     txtUser.Text = "";
@@ -74,8 +82,18 @@ namespace Client.Forms
             listViewFiles.Items.Clear();
             txtAddressBar.Text = "/";
             btnLogout.Visible = false; // Ẩn nút Đăng xuất
-            panelLogin.Visible = true; // Hiện lại bảng đăng nhập
-            this.Text = "File Storage App"; // Đặt lại tiêu đề mặc định
+            
+            // Hiện lại các control đăng nhập
+            txtIP.Visible = true;
+            txtUser.Visible = true;
+            txtPass.Visible = true;
+            btnLogin.Visible = true;
+            btnRegister.Visible = true;
+            
+            // Ẩn label chào mừng
+            lblWelcome.Visible = false;
+
+            this.Text = "File Storage Client (LTM)"; // Đặt lại tiêu đề mặc định
             MessageBox.Show("Đã đăng xuất thành công!");
         }
 

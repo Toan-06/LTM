@@ -14,6 +14,7 @@ namespace Client.Forms
         private System.Windows.Forms.TextBox txtPass;
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnRegister;
+        private System.Windows.Forms.Label lblWelcome;
         
         private System.Windows.Forms.ListView listViewFiles;
         private System.Windows.Forms.ColumnHeader colName;
@@ -57,6 +58,7 @@ namespace Client.Forms
             txtPass = new TextBox();
             btnLogin = new Button();
             btnRegister = new Button();
+            lblWelcome = new Label();
             listViewFiles = new ListView();
             colName = new ColumnHeader();
             colSize = new ColumnHeader();
@@ -84,6 +86,7 @@ namespace Client.Forms
             panelLogin.Controls.Add(txtPass);
             panelLogin.Controls.Add(btnLogin);
             panelLogin.Controls.Add(btnRegister);
+            panelLogin.Controls.Add(lblWelcome);
             panelLogin.Dock = DockStyle.Top;
             panelLogin.Location = new Point(0, 0);
             panelLogin.Margin = new Padding(3, 4, 3, 4);
@@ -146,6 +149,17 @@ namespace Client.Forms
             btnRegister.Text = "Đăng Ký";
             btnRegister.UseVisualStyleBackColor = false;
             btnRegister.Click += BtnRegister_Socket_Click;
+            // 
+            // lblWelcome
+            // 
+            lblWelcome.AutoSize = true;
+            lblWelcome.Font = new Font("Segoe UI", 10.8F, FontStyle.Bold, GraphicsUnit.Point);
+            lblWelcome.ForeColor = Color.White;
+            lblWelcome.Location = new Point(26, 18);
+            lblWelcome.Name = "lblWelcome";
+            lblWelcome.Size = new Size(0, 25);
+            lblWelcome.TabIndex = 5;
+            lblWelcome.Visible = false;
             // 
             // listViewFiles
             // 
